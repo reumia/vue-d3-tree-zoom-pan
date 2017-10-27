@@ -1,7 +1,7 @@
 <template>
   <div class="tree">
     <h1 class="title">Vue + D3 : 줌과 패닝이 가능한 Tree 그래프 그리기</h1>
-    <svg class="container" :width="viewer.w" :height="viewer.h" ref="svg">
+    <svg @click="setZoom" class="container" :width="viewer.w" :height="viewer.h" ref="svg">
       <g :transform="`translate(${zoom.x},${zoom.y})scale(${zoom.k})`">
         <path
           class="link"
@@ -70,7 +70,18 @@
         const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', this.onZoom)
         const selection = d3.select(this.$refs.svg)
 
-        selection.call(zoom)
+        selection
+          .call(zoom)
+          .call(zoom.transform, this.initZoom())
+      },
+      initZoom () {
+        this.zoom.x = 40
+        this.zoom.y = 0
+        this.zoom.k = 1
+
+        return d3.zoomIdentity
+          .translate(this.zoom.x, this.zoom.y)
+          .scale(this.zoom.k)
       },
       onZoom () {
         this.zoom.x = d3.event.transform.x
