@@ -50,13 +50,13 @@ var stratify = d3.stratify()...
     
 // CSV 포멧으로부터 데이터 모델 생성  
 d3.csv("flare.csv", function(error, data) {
-  	// ...
-	// d3-hierarchy API로 tree 구조 데이터 모델 생성
-	var root = stratify(data).sort(function(a, b) { 
-		return (a.height - b.height) || a.id.localeCompare(b.id); 
-	});
-		
-	// ... 생성된 데이터로 화면을 그린다.
+  // ...
+  // d3-hierarchy API로 tree 구조 데이터 모델 생성
+  var root = stratify(data).sort(function(a, b) { 
+    return (a.height - b.height) || a.id.localeCompare(b.id); 
+  });
+    
+  // ... 생성된 데이터로 화면을 그린다.
 ```
 
 __Vue에서의 적용__
@@ -67,31 +67,31 @@ __Vue에서의 적용__
 import data from '@/data'
 
 export default {
-	// ...
-	data () {
-		// 템플릿에 바인딩할 데이터를 정의
-		return {
-			nodes: [],
-			lines: []
-		}
-	},
-	created () {
-		// Vue 인스턴스가 생성된 후, 데이터 생성 함수를 실행
-		this.setData()
-	},
-	methods () {
-		setData () {
-			// d3-hierarchy API로 tree 구조 데이터 모델 생성
-			const stratify = d3.stratify().id((d) => d.id).parentId((d) => d.parentId)
-			const stratified = stratify(data)
-			const tree = d3.tree().size([this.viewer.w, this.viewer.h])
-				
-			// 템플릿으로 화면을 그릴 데이터를 Vue data 객체에 전달
-			tree(stratified)
-			this.nodes = stratified.descendants()
-			this.lines = stratified.descendants().slice(1)
-		}
-		// ...
+  // ...
+  data () {
+    // 템플릿에 바인딩할 데이터를 정의
+    return {
+      nodes: [],
+      lines: []
+    }
+  },
+  created () {
+    // Vue 인스턴스가 생성된 후, 데이터 생성 함수를 실행
+    this.setData()
+  },
+  methods () {
+    setData () {
+      // d3-hierarchy API로 tree 구조 데이터 모델 생성
+      const stratify = d3.stratify().id((d) => d.id).parentId((d) => d.parentId)
+      const stratified = stratify(data)
+      const tree = d3.tree().size([this.viewer.w, this.viewer.h])
+        
+      // 템플릿으로 화면을 그릴 데이터를 Vue data 객체에 전달
+      tree(stratified)
+      this.nodes = stratified.descendants()
+      this.lines = stratified.descendants().slice(1)
+    }
+    // ...
 ```
 
 
@@ -128,11 +128,11 @@ d3.csv("flare.csv", function(error, data) {
 
 ```html
 <svg width="600" height="600">
-	<g transform="translate(40,0)">
-		<path class="link" d="M200,25.9067...">
-		<path class="link" d="M200,25.1761...">
-		<path class="link" d="M200,25.1709...">
-		<!-- ... -->
+  <g transform="translate(40,0)">
+    <path class="link" d="M200,25.9067...">
+    <path class="link" d="M200,25.1761...">
+    <path class="link" d="M200,25.1709...">
+    <!-- ... -->
 ```
 
 __Vue에서의 적용__
@@ -140,13 +140,13 @@ __Vue에서의 적용__
 ```html
 <!-- template -->
 <template>
-	<svg class="container" :width="viewer.w" :height="viewer.h">
-		<g :transform="`translate(40, 0)`">
-			<path
-				class="link"
-				v-for="line in lines"
-				:d="getDiagonal(line)"
-        	></path>
+  <svg class="container" :width="viewer.w" :height="viewer.h">
+    <g :transform="`translate(40, 0)`">
+      <path
+        class="link"
+        v-for="line in lines"
+        :d="getDiagonal(line)"
+      ></path>
 ```
 나머지 내용도 위와 동일하게 적용할 수 있으므로 생략한다.  
 본 단락의 최상단에 링크한 예제 소스를 통해 현재 단계에서 작성된 전체 소스를 확인할 수 있다.
@@ -169,33 +169,33 @@ v4를 사용하기 위해서 링크한 튜토리얼로 구조를 참고하고, [
 
 ```html
 <template>
-	<div class="tree">
-		<!-- ... -->
-		<svg ref="svg" class="container" :width="viewer.w" :height="viewer.h">
-    		<!-- ... -->
+  <div class="tree">
+    <!-- ... -->
+    <svg ref="svg" class="container" :width="viewer.w" :height="viewer.h">
+        <!-- ... -->
 ```
 ```javascript
 export deafault {
-	// ...
-	mounted () {
-		// $refs는 created hook에서는 할당되지 않기 때문에 mounted hook을 사용한다.
-		this.setZoom()
-	},
-	methods: {
-		// ...
-		setZoom () {
-			// zoom의 scale 범위, zoom 이벤트가 실행할 callback 등의 옵션을 정의한다.
-			const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', this.onZoom)
-			// selection을 $refs로 생성한다.
-	      	const selection = d3.select(this.$refs.svg)
-	      	
-	      	selection.call(zoom)
-		},
-		onZoom () {
-			// Console을 통해 d3.event에 할당되는 값을 확인한다.
-			console.log(d3.event)
-		}
-	}
+  // ...
+  mounted () {
+    // $refs는 created hook에서는 할당되지 않기 때문에 mounted hook을 사용한다.
+    this.setZoom()
+  },
+  methods: {
+    // ...
+    setZoom () {
+      // zoom의 scale 범위, zoom 이벤트가 실행할 callback 등의 옵션을 정의한다.
+      const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', this.onZoom)
+      // selection을 $refs로 생성한다.
+          const selection = d3.select(this.$refs.svg)
+          
+          selection.call(zoom)
+    },
+    onZoom () {
+      // Console을 통해 d3.event에 할당되는 값을 확인한다.
+      console.log(d3.event)
+    }
+  }
 ```
 
 ### 2-2. Translate, Scale 바인딩
@@ -206,35 +206,35 @@ export deafault {
 
 ```javascript
 export default {
-	data () {
-		return {
-			// D3-zoom 이벤트가 만들어내는 zoom 객체와 동일한 모양으로 구성
-			// https://github.com/d3/d3-zoom/blob/master/src/transform.js
-			zoom: {
-				x: 40,		// Translate를 위한 X좌표 초기값
-				y: 0,		// Translate를 위한 Y좌표 초기값
-				k: 1		// Scale 초기값
-			}
-			// ...
-		}
-	},
-	methods: {
-		// ...
-		onZoom () {
-			// 변경된 값을 data에 전달하면, 변경된 내용이 template에 반영된다.
-			this.zoom.x = d3.event.transform.x
-			this.zoom.y = d3.event.transform.y
-			this.zoom.k = d3.event.transform.k
-		}
-		// ...
+  data () {
+    return {
+      // D3-zoom 이벤트가 만들어내는 zoom 객체와 동일한 모양으로 구성
+      // https://github.com/d3/d3-zoom/blob/master/src/transform.js
+      zoom: {
+        x: 40,	// Translate를 위한 X좌표 초기값
+        y: 0,		// Translate를 위한 Y좌표 초기값
+        k: 1 		// Scale 초기값
+      }
+      // ...
+    }
+  },
+  methods: {
+    // ...
+    onZoom () {
+      // 변경된 값을 data에 전달하면, 변경된 내용이 template에 반영된다.
+      this.zoom.x = d3.event.transform.x
+      this.zoom.y = d3.event.transform.y
+      this.zoom.k = d3.event.transform.k
+    }
+    // ...
 ```
 ```html
 <template>
-	<div class="tree">
-		<!-- ... -->
-		<svg ref="svg" class="container" :width="viewer.w" :height="viewer.h">
-      		<g :transform="`translate(${zoom.x},${zoom.y})scale(${zoom.k})`">
-        		<!-- ... -->
+  <div class="tree">
+    <!-- ... -->
+    <svg ref="svg" class="container" :width="viewer.w" :height="viewer.h">
+      <g :transform="`translate(${zoom.x},${zoom.y})scale(${zoom.k})`">
+      <!-- ... -->
 ```
 
 ## 3. d3.zoomIdentity
@@ -248,37 +248,37 @@ export default {
 
 ```javascript
 export default {
-	// ...
-	methods: {
-		// ...
-		setZoom () {
-			const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', this.onZoom)
-      		const selection = d3.select(this.$refs.svg)
+  // ...
+  methods: {
+    // ...
+    setZoom () {
+      const zoom = d3.zoom().scaleExtent([1, 10]).on('zoom', this.onZoom)
+        const selection = d3.select(this.$refs.svg)
 
-        	selection
-          	.call(zoom)
-          	// 초기화된 zoom 값을 적용한다.
-          	.call(zoom.transform, this.initZoom())
-		},
-		initZoom () {
-			// zoom 값을 초기화한다.
-			this.zoom.x = 40
-			this.zoom.y = 0
-			this.zoom.k = 1
-			// 초기화된 zoom 값을 d3-zoom API에 전달한다.
-			return d3.zoomIdentity
-				.translate(this.zoom.x, this.zoom.y)
-				.scale(this.zoom.k)
-		},
-		// ...
+        selection
+          .call(zoom)
+          // 초기화된 zoom 값을 적용한다.
+          .call(zoom.transform, this.initZoom())
+    },
+    initZoom () {
+      // zoom 값을 초기화한다.
+      this.zoom.x = 40
+      this.zoom.y = 0
+      this.zoom.k = 1
+      // 초기화된 zoom 값을 d3-zoom API에 전달한다.
+      return d3.zoomIdentity
+        .translate(this.zoom.x, this.zoom.y)
+        .scale(this.zoom.k)
+    },
+    // ...
 ```
 ```html
 <template>
-	<div class="tree">
-		<!-- ... -->
-		<!-- 클릭시 다시 Zoom을 초기화할 수 있도록 @click 속성으로 이벤트를 할당한다. -->
-		<svg @click="setZoom" ref="svg" class="container" :width="viewer.w" :height="viewer.h">
-    		<!-- ... -->
+  <div class="tree">
+    <!-- ... -->
+    <!-- 클릭시 다시 Zoom을 초기화할 수 있도록 @click 속성으로 이벤트를 할당한다. -->
+    <svg @click="setZoom" ref="svg" class="container" :width="viewer.w" :height="viewer.h">
+      <!-- ... -->
 ```
 
 
