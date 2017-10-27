@@ -16,6 +16,99 @@ Vue와 d3를 사용해 Tree 구조의 그래프를 그리고, 간단히 Zoom과 
 > [__d3 공식 튜토리얼__ : Tidy Tree vs Dendogram](https://bl.ocks.org/mbostock/e9ba78a2c1070980d1b530800ce7fa2b)  
 > [__Vue 적용 예제__ : Github](https://github.com/reumia/vue-d3-tree-zoom-pan/tree/f5eece5ddf354f4a9c4af093c945a074c6fe5e63)
 
+### data 준비
+
+JavaScript 소스를 읽을 때에는 함수가 정의되는 부분과 실제로 함수가 실행되는 부분을 구분하여 확인하는 것이 중요하다. 튜토리얼 소스는 `d3.csv()`가 실행될 때에 callback으로 실행되는 익명함수가 나머지 모든 함수를 실행하는 구조이다.
+
+`d3.csv`는 `d3.tree`가 사용할 수 있는 JSON 포멧의 데이터를 CSV 포멧의 소스를 기반으로 생성하는 [d3-dsv API](https://github.com/d3/d3-dsv)이며, 본 포스팅에서는 준비된 JSON 포멧의 소스를 기반으로 하기에 간소화할 수 있다.
+
+__튜토리얼 소스__
+
+```javascript
+// ...
+
+// d3-tree API가 각 node의 위치를 포함한 tree 객체를 만들어낼 수 있도록 캔버스의 크기를 지정하는 내용이다.
+var tree = d3.tree()
+    .size([height - 400, width - 160]);
+
+// d3-hierarchy API 옵션을 정의한다.
+var stratify = d3.stratify()
+    .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
+    
+// CSV 포멧으로 전달된 파일을 JSON 객체형태로 Parsing 한다.    
+d3.csv("flare.csv", function(error, data) {
+  	if (error) throw error;
+  
+	// d3-hierarchy API로 d3-tree API에 필요한 구조로 data를 JSON 구조로 parsing한다.
+	var root = stratify(data).sort(function(a, b) { 
+		return (a.height - b.height) || a.id.localeCompare(b.id); 
+	});
+		
+	// JSON으로 parsing된 data를 기반으로 화면을 그린다.
+   	// ...
+```
+
+__Vue에서의 적용__
+
+```javascript
+
+```
+
+
+### 그래프 그리기 : DOM Element 핸들링
+
+튜토리얼은 d3만으로 작성되어 있기 때문에, `d3.selection API`를 활용해 DOM Element를 가져오고, `.attr()`로 속성을 추가하거나 `.append()`로 DOM 내에 삽입하는 구조로 작성되어 있지만, `Vue`에서 이와 같은 방식으로 DOM Element를 다루는 것은 어색하다.
+
+크롬 개발자도구를 통해 튜토리얼 소스가 만들어내는 `html`의 형태를 확인하고, `Vue`를 이용해 같은 모양으로 만들어내는 방식으로 작성해 나가면 편리하다.
+
+__튜토리얼 소스__
+
+```html
+<svg width="600" height="600"></svg>
+```
+```javascript
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height"),
+    g = svg.append("g").attr("transform", "translate(40,0)");
+    
+// ...
+    
+d3.csv("flare.csv", function(error, data) {
+  	// ...
+	var link = g.selectAll(".link")
+		.data(root.descendants().slice(1))
+	   	.enter().append("path")
+	   	.attr("class", "link")
+	   	.attr("d", diagonal);	
+	   	
+   	// ...
+```
+
+위 코드는 결과적으로 아래와 같은 구조의 `html`을 만들어낸다. 
+
+```html
+<svg width="600" height="600">
+	<g transform="translate(40,0)">
+		<path class="link" d="M200,25.9067...">
+		<path class="link" d="M200,25.1761...">
+		<path class="link" d="M200,25.1709...">
+		<!-- ... -->
+```
+
+`.data(root.descendants().slice(1))`로 전달된 `JSON`을 바탕으로 `<path>`를 반복적으로 `<g>`에 `.append()`하는 내용임을 확인한다.
+
+__Vue에서의 적용__
+
+```html
+<template></template>
+```
+```javascript
+
+```
+
+나머지 내용도 위와 동일하게 적용할 수 있으므로 생략한다.  
+본 단락의 최상단에 링크한 [__Vue 적용 예제__ : Github](https://github.com/reumia/vue-d3-tree-zoom-pan/tree/f5eece5ddf354f4a9c4af093c945a074c6fe5e63)를 통해 현재 단계에서 작성된 전체 소스를 확인할 수 있다.
 
 ## Zoom & Panning
 
@@ -158,7 +251,22 @@ export default {
 
 > [__전체 소스__ : Github](https://github.com/reumia/vue-d3-tree-zoom-pan)
 
-__그런데 말입니다...__ 토마토, 감자, 고추가 전부다 가지과라는 사실, 여러분 알고 계셨습니까? 제게는 너무나 충격적이었던 감자 열매 사진을 공유하면서 이 포스팅을 마치겠습니다.
+포스팅에서 사용한 전체 소스는 위 링크를 통해 확인할 수 있다. 소스를 클론받고 사용하기 위해서는 아래의 절차를 거치면 된다.
+
+``` bash
+# 저장소 클론
+git clone https://github.com/reumia/vue-d3-tree-zoom-pan.git
+
+# 의존성 모듈 설치
+npm install
+
+# localhost:8080 서버 실행
+npm run dev
+```
+
+이 포스팅의 예제는 사실 무서운 비밀이 숨어있다. 여기서 그린 Tree 그래프는 속씨식물군의 구조를 선별적으로 나열하고 있는데, 트리의 마지막을 따라가면 놀라운 사실을 알 수 있다.
+
+__여러분..__ 토마토, 감자, 고추가 전부다 가지과라는 사실, 알고 계셨습니까? 내게는 너무나 충격적이었던 [감자 열매 사진](https://www.google.co.kr/search?q=%EA%B0%90%EC%9E%90%EC%97%B4%EB%A7%A4&rlz=1C5CHFA_enKR722KR722&source=lnms&tbm=isch&sa=X&ved=0ahUKEwjrnJ7S_43XAhUKgLwKHTQ5BxgQ_AUICigB&biw=1573&bih=880#imgrc=ZjmbJaCywgOerM:)을 공유하면서 이 포스팅을 마친다.
 
 #### 참고문서
 
@@ -166,13 +274,3 @@ __그런데 말입니다...__ 토마토, 감자, 고추가 전부다 가지과�
 - [Drag & Zoom simple example](https://bl.ocks.org/mbostock/6123708)
 - [D3 Zoom initial transition state](https://github.com/d3/d3/issues/2521)
 - [Zoom to bound box](https://bl.ocks.org/mbostock/9656675)
-
-#### 소스빌드
-
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
-```
